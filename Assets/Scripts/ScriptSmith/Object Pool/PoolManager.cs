@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Arixen.ScriptSmith
@@ -9,6 +11,12 @@ namespace Arixen.ScriptSmith
     {
         private static Dictionary<int, List<PoolableObject>> pools = new Dictionary<int, List<PoolableObject>>();
 
+        public static T GetPoolableObject<T>(T poolablePrefab)
+            where T : PoolableObject
+        {
+            return GetPoolableObject<T>(poolablePrefab, Vector3.negativeInfinity, default);
+        }
+        
         public static T GetPoolableObject<T>(T poolablePrefab, Vector3 position, Quaternion rotation)
             where T : PoolableObject
         {
@@ -21,9 +29,16 @@ namespace Arixen.ScriptSmith
 
             pools.TryGetValue(objHash, out var poolList);
             var poolObj = poolList.Find(_poolObj => _poolObj.isInUse == false);
-            if (poolObj != null)
+            if (poolObj == null)
             {
-                usablePoolableObject = CreatePoolableObject<T>(poolablePrefab, position, rotation);
+                if(position != Vector3.negativeInfinity && rotation != default)
+                {
+                    usablePoolableObject = CreatePoolableObject(poolablePrefab);
+                }
+                else
+                {
+                    usablePoolableObject = CreatePoolableObject<T>(poolablePrefab, position, rotation);
+                }
                 usablePoolableObject.isInUse = true;
             }
             else
@@ -41,6 +56,15 @@ namespace Arixen.ScriptSmith
             poolList.ForEach(obj => PoolObject(obj));
         }
 
+        public static void PoolObjects<T>(T poolablePrefab, List<T> poolableList) where T : PoolableObject
+        {
+            int objHash = poolablePrefab.name.GetHashCode();
+            pools.TryGetValue(objHash, out var poolList);
+            var usablePoolableList = new List<PoolableObject>();
+            foreach (var poolableObject in poolableList) usablePoolableList.Add(poolableObject);
+            poolList.FindAll(obj=> usablePoolableList.Contains(obj)).ForEach(obj => PoolObject(obj));
+        }
+
         private static void PoolObject(PoolableObject poolable)
         {
             if (!poolable.InitialInit)
@@ -48,10 +72,17 @@ namespace Arixen.ScriptSmith
                 poolable.Init();
             }
 
+            poolable.isInUse = false;
+
             poolable.gameObject.SetActive(false);
         }
 
         private static PoolableObject CreatePoolableObject<T>(T poolablePrefab, Vector3 position, Quaternion rotation)
+            where T : PoolableObject
+        {
+            return GameObject.Instantiate<T>(poolablePrefab,position,rotation);
+        }
+        private static PoolableObject CreatePoolableObject<T>(T poolablePrefab)
             where T : PoolableObject
         {
             return GameObject.Instantiate<T>(poolablePrefab);

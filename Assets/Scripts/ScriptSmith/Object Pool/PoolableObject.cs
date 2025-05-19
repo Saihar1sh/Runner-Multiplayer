@@ -9,12 +9,18 @@ namespace Arixen.ScriptSmith
         public bool isInUse;
         public bool InitialInit { get; private set; }
 
+        
+
+        public void OnEnable()
+        {
+            isInUse = true;
+        }
         public void OnDisable()
         {
             isInUse = false;
         }
 
-        public void Init()
+        public virtual void Init()
         {
             InitialInit = true;
         }
