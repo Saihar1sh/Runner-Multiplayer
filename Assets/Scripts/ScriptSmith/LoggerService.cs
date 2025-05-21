@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Arixen.ScriptSmith
 {
@@ -11,7 +12,7 @@ namespace Arixen.ScriptSmith
             HighWarning,
             Error,
         }
-
+[HideInCallstack]
         public static void Debug(string message, LogLevel level = LogLevel.Log)
         {
             switch (level)
@@ -32,5 +33,7 @@ namespace Arixen.ScriptSmith
                     throw new ArgumentOutOfRangeException(nameof(level), level, null);
             }
         }
+        [HideInCallstack]
+        public static void Debug(this MonoBehaviour monoBehaviour, string message, LogLevel level = LogLevel.Log)=> Debug($"[{monoBehaviour.name}]: {message}", level);
     }
 }

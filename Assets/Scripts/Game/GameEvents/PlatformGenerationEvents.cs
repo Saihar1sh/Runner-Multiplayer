@@ -6,7 +6,7 @@ public class PlatformCreateEvent : IGameEventData
      
 }
 
-public class PlatformDestroyedEvent : IGameEventData
+public class GameStartEvent : IGameEventData
 {
      
 }

@@ -5,7 +5,7 @@ using Arixen.ScriptSmith;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class PlatformManager : MonoBehaviour
+public class PlatformManager : MonoGenericLazySingleton<PlatformManager>
 {
     [SerializeField] private PlatformController[] _platforms;
 
@@ -13,8 +13,21 @@ public class PlatformManager : MonoBehaviour
     {
         _platforms = GetComponentsInChildren<PlatformController>();
         EventBusService.Subscribe<PlatformCreateEvent>(PlatformCreation);
+        EventBusService.Subscribe<GameStartEvent>(OnGameStart);
     }
 
+    private void OnGameStart(GameStartEvent e)
+    {
+        StartGame();
+    }
+
+    public void ReusePlatform(PlatformController platform)
+    {
+        platform.gameObject.SetActive(true);
+        platform.transform.position += Vector3.forward * (_platforms.Length-1) * (platform.platformSize);
+
+    }
+    
     private void PlatformCreation(PlatformCreateEvent e)
     {
         PlatformController platform = default;
@@ -41,6 +54,15 @@ public class PlatformManager : MonoBehaviour
         {
             var platform = _platforms[i];
             platform.transform.position = Vector3.forward * i * platform.platformSize;
+            platform.gameObject.SetActive(false);
+        }
+    }
+
+    private void StartGame()
+    {
+        foreach (var platform in _platforms)
+        {
+            platform.gameObject.SetActive(true);
         }
     }
 }

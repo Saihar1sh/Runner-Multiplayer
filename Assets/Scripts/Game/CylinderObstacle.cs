@@ -18,6 +18,10 @@ public class CylinderObstacle : MonoBehaviour
         if (other.gameObject.layer == 7)        //player layer
         {
             TriggerFall();
+            if(other.gameObject.TryGetComponent<PlayerController>(out var playerController))
+            {
+                playerController.LostMultiplier();
+            }
         }
     }
 
@@ -27,7 +31,6 @@ public class CylinderObstacle : MonoBehaviour
     }
     private void OnDisable()
     {
-        Debug.Log("disable");
         _animator.ResetTrigger(_fallTriggerHash);
     }
 }

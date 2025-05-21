@@ -17,6 +17,7 @@ public class PlatformController : MonoBehaviour
         if (transform.position.z < -1f * platformSize)
         {
             DisablePlatform();
+            PlatformManager.Instance.ReusePlatform(this);
         }
     }
 
